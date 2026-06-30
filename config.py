@@ -18,6 +18,10 @@ BASE_DIR = Path(__file__).resolve().parent
 class Config:
     """Base configuration shared by every environment."""
 
+    # The defaults below are deliberately dummy values, safe to commit: they let
+    # the app run locally with zero setup. They are NOT secret. In production
+    # (e.g. PythonAnywhere) ALWAYS override SECRET_KEY and NEMORY_PASSWORD via
+    # environment variables — never rely on these defaults on a public server.
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev-only-insecure-key")
 
     # Plain-text single-user password from the environment. It is hashed once at
