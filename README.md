@@ -34,16 +34,106 @@ python -c "import secrets; print(secrets.token_hex(32))"
 
 ## Run
 
+On Windows, the simplest way (creates the DB on first run, opens the browser):
+
+```powershell
+.\run.ps1                       # http://127.0.0.1:8000
+```
+
+Or manually, on any platform:
+
 ```bash
 flask --app wsgi init-db        # create the database (once)
-flask --app wsgi run --debug    # http://127.0.0.1:5000
+flask --app wsgi run --debug --port 8000
 ```
+
+> Port 8000 is used instead of 5000 because Windows often reserves port 5000
+> (you'd see WinError 10013 / "socket access forbidden").
 
 Production:
 
 ```bash
 waitress-serve --port=8000 wsgi:app
 ```
+
+## Deploy to PythonAnywhere (free)
+
+The free **Beginner** plan runs Flask + SQLite as-is: the database is just a file in
+your persistent home directory (512 MB), so data survives restarts. No code changes
+needed. Replace `USER` with your PythonAnywhere username throughout.
+
+**1. Create the account** at <https://www.pythonanywhere.com> (Beginner / $0).
+
+**2. Clone the repo** — open a **Bash console** (Consoles tab) and run:
+
+```bash
+git clone https://github.com/danieltremblay18/Nemory.git
+cd Nemory
+```
+
+**3. Create a virtualenv and install dependencies:**
+
+```bash
+python3.11 -m venv ~/.venvs/nemory
+source ~/.venvs/nemory/bin/activate
+pip install -r requirements.txt
+```
+
+**4. Initialize the database** (creates `~/Nemory/instance/nemory.sqlite`):
+
+```bash
+flask --app wsgi init-db
+```
+
+**5. Create the web app** — go to the **Web** tab → *Add a new web app* →
+*Manual configuration* (not the "Flask" preset) → pick **Python 3.11** (match step 3).
+
+**6. Point the web app at the project** — in the Web tab's *Code* section set:
+
+- **Source code**: `/home/USER/Nemory`
+- **Working directory**: `/home/USER/Nemory`
+- **Virtualenv**: `/home/USER/.venvs/nemory`
+
+**7. Edit the WSGI file** — click the *WSGI configuration file* link in the Web tab,
+delete its contents, and replace with (this is also where the secrets live, kept out
+of git):
+
+```python
+import sys
+
+project = "/home/USER/Nemory"
+if project not in sys.path:
+    sys.path.insert(0, project)
+
+import os
+os.environ["SECRET_KEY"] = "paste-a-generated-key-here"   # python -c "import secrets; print(secrets.token_hex(32))"
+os.environ["NEMORY_PASSWORD"] = "your-login-password"
+
+from wsgi import app as application
+```
+
+**8. (Optional) Serve static files faster** — in the Web tab's *Static files* section
+add a mapping: URL `/static/` → Directory `/home/USER/Nemory/app/static`.
+
+**9. Reload** the web app (green button), then open
+`https://USER.pythonanywhere.com` and log in with `NEMORY_PASSWORD`.
+
+### Updating later
+
+```bash
+cd ~/Nemory && git pull
+source ~/.venvs/nemory/bin/activate && pip install -r requirements.txt   # if deps changed
+```
+
+Then hit **Reload** in the Web tab.
+
+### Free-plan notes
+
+- **Renew every 3 months**: log in and click the "Run until 3 months from today"
+  button on the Web tab, or the app is paused. **Your data is not deleted.**
+- Database backup: just download `~/Nemory/instance/nemory.sqlite` from the Files tab.
+- The free plan allows outbound internet only to a whitelist; Nemory makes no external
+  calls, so this has no effect.
 
 ## Tests
 
