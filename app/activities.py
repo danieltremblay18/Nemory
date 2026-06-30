@@ -1,0 +1,206 @@
+"""Activity routes: create, view, edit, delete.
+
+An activity records something that happened to an asset and, optionally, when it
+should happen again. The next reminder date is always derived — never entered by
+hand — via the reminders service.
+"""
+
+from datetime import date
+
+from flask import (
+    Blueprint,
+    flash,
+    redirect,
+    render_template,
+    request,
+    url_for,
+)
+from werkzeug.exceptions import abort
+
+from app.auth import login_required
+from app.db import get_db
+from app.services.reminders import VALID_UNITS, compute_next_reminder_date
+
+bp = Blueprint("activities", __name__, url_prefix="/activities")
+
+
+def get_activity_or_404(activity_id: int):
+    activity = (
+        get_db()
+        .execute(
+            """
+            SELECT act.*, a.name AS asset_name
+            FROM activities act
+            JOIN assets a ON a.id = act.asset_id
+            WHERE act.id = ?
+            """,
+            (activity_id,),
+        )
+        .fetchone()
+    )
+    if activity is None:
+        abort(404, f"Activity {activity_id} does not exist.")
+    return activity
+
+
+def _all_assets():
+    return (
+        get_db()
+        .execute("SELECT id, name FROM assets ORDER BY name COLLATE NOCASE")
+        .fetchall()
+    )
+
+
+def _parse_form(form):
+    """Validate and normalize the activity form.
+
+    Returns ``(values, error)`` where ``values`` is a dict ready for SQL and
+    ``error`` is a user-facing message or ``None``.
+    """
+    asset_id = form.get("asset_id", type=int)
+    title = form.get("title", "").strip()
+    description = form.get("description", "").strip()
+    activity_date_raw = form.get("activity_date", "").strip()
+    interval_raw = form.get("reminder_interval", "").strip()
+    unit = form.get("reminder_unit", "").strip() or None
+
+    if not asset_id:
+        return None, "Please choose an asset."
+    if not title:
+        return None, "Title is required."
+    try:
+        activity_date = date.fromisoformat(activity_date_raw)
+    except ValueError:
+        return None, "A valid activity date is required."
+
+    interval = None
+    if interval_raw:
+        try:
+            interval = int(interval_raw)
+        except ValueError:
+            return None, "Reminder interval must be a whole number."
+        if interval <= 0:
+            return None, "Reminder interval must be greater than zero."
+        if unit not in VALID_UNITS:
+            return None, "Please choose a reminder unit."
+    else:
+        unit = None  # no interval -> no reminder
+
+    next_reminder = compute_next_reminder_date(activity_date, interval, unit)
+
+    return (
+        {
+            "asset_id": asset_id,
+            "title": title,
+            "description": description,
+            "activity_date": activity_date.isoformat(),
+            "reminder_interval": interval,
+            "reminder_unit": unit,
+            "next_reminder_date": next_reminder.isoformat()
+            if next_reminder
+            else None,
+        },
+        None,
+    )
+
+
+@bp.route("/new", methods=("GET", "POST"))
+@login_required
+def create():
+    assets = _all_assets()
+    if not assets:
+        flash("Create an asset first.")
+        return redirect(url_for("assets.create"))
+
+    if request.method == "POST":
+        values, error = _parse_form(request.form)
+        if error:
+            flash(error)
+            return render_template(
+                "activities/form.html",
+                activity=request.form,
+                assets=assets,
+                units=VALID_UNITS,
+            )
+        db = get_db()
+        cur = db.execute(
+            """
+            INSERT INTO activities
+                (asset_id, title, description, activity_date,
+                 reminder_interval, reminder_unit, next_reminder_date)
+            VALUES (:asset_id, :title, :description, :activity_date,
+                    :reminder_interval, :reminder_unit, :next_reminder_date)
+            """,
+            values,
+        )
+        db.commit()
+        flash("Activity saved.")
+        return redirect(url_for("activities.detail", activity_id=cur.lastrowid))
+
+    # Pre-select an asset and default the date to today for a fast (<30s) entry.
+    prefill = {
+        "asset_id": request.args.get("asset_id", type=int),
+        "activity_date": date.today().isoformat(),
+    }
+    return render_template(
+        "activities/form.html", activity=prefill, assets=assets, units=VALID_UNITS
+    )
+
+
+@bp.route("/<int:activity_id>")
+@login_required
+def detail(activity_id: int):
+    activity = get_activity_or_404(activity_id)
+    return render_template("activities/detail.html", activity=activity)
+
+
+@bp.route("/<int:activity_id>/edit", methods=("GET", "POST"))
+@login_required
+def edit(activity_id: int):
+    activity = get_activity_or_404(activity_id)
+    assets = _all_assets()
+
+    if request.method == "POST":
+        values, error = _parse_form(request.form)
+        if error:
+            flash(error)
+            return render_template(
+                "activities/form.html",
+                activity=request.form,
+                assets=assets,
+                units=VALID_UNITS,
+            )
+        db = get_db()
+        db.execute(
+            """
+            UPDATE activities SET
+                asset_id = :asset_id,
+                title = :title,
+                description = :description,
+                activity_date = :activity_date,
+                reminder_interval = :reminder_interval,
+                reminder_unit = :reminder_unit,
+                next_reminder_date = :next_reminder_date,
+                updated_at = datetime('now')
+            WHERE id = :id
+            """,
+            {**values, "id": activity_id},
+        )
+        db.commit()
+        flash("Activity updated.")
+        return redirect(url_for("activities.detail", activity_id=activity_id))
+
+    return render_template(
+        "activities/form.html", activity=activity, assets=assets, units=VALID_UNITS
+    )
+
+
+@bp.route("/<int:activity_id>/delete", methods=("POST",))
+@login_required
+def delete(activity_id: int):
+    activity = get_activity_or_404(activity_id)
+    db = get_db()
+    db.execute("DELETE FROM activities WHERE id = ?", (activity_id,))
+    db.commit()
+    flash("Activity deleted.")
+    return redirect(url_for("assets.detail", asset_id=activity["asset_id"]))

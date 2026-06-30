@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Assets · Nemory{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <h1 class="page-title">Assets</h1>
+  <a class="btn btn--small" href="{{ url_for('assets.create') }}">New asset</a>
+</div>
+
+{% if assets %}
+<div class="list">
+  {% for asset in assets %}
+  <a class="card asset" href="{{ url_for('assets.detail', asset_id=asset.id) }}">
+    <span class="asset__name">{{ asset.name }}</span>
+    <span class="asset__count">{{ asset.activity_count }} {{ 'activity' if asset.activity_count == 1 else 'activities' }}</span>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<p class="empty">No assets yet. Add a house, vehicle, or anything you maintain.</p>
+{% endif %}
+{% endblock %}

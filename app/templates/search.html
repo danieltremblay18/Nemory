@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Search · Nemory{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Search</h1>
+
+<form method="get" action="{{ url_for('main.search') }}" class="search-form">
+  <input type="search" name="q" value="{{ query }}" autofocus
+         placeholder="Asset, title, or details…" autocomplete="off">
+</form>
+
+{% if query %}
+  {% if results %}
+    <p class="muted">{{ results|length }} result{{ '' if results|length == 1 else 's' }}</p>
+    {% for activity in results %}{% include "_activity_card.html" %}{% endfor %}
+  {% else %}
+    <p class="empty">No activities match “{{ query }}”.</p>
+  {% endif %}
+{% endif %}
+{% endblock %}

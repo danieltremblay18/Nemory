@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Sign in · Nemory{% endblock %}
+
+{% block content %}
+<div class="login">
+  <h1 class="login__brand">Nemory</h1>
+  <p class="login__tagline">Your personal maintenance journal.</p>
+
+  <form method="post" class="form">
+    <label class="field">
+      <span class="field__label">Password</span>
+      <input type="password" name="password" autocomplete="current-password"
+             autofocus required>
+    </label>
+    <button type="submit" class="btn btn--primary btn--block">Sign in</button>
+  </form>
+</div>
+{% endblock %}

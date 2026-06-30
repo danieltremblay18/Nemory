@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}{{ asset.name }} · Nemory{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <h1 class="page-title">{{ asset.name }}</h1>
+  <a class="btn btn--small btn--ghost" href="{{ url_for('assets.edit', asset_id=asset.id) }}">Edit</a>
+</div>
+
+<a class="btn btn--primary btn--block"
+   href="{{ url_for('activities.create', asset_id=asset.id) }}">Add activity</a>
+
+<section class="section">
+  <h2 class="section__title">Activities</h2>
+  {% if activities %}
+    {% for activity in activities %}{% include "_activity_card.html" %}{% endfor %}
+  {% else %}
+    <p class="empty">No activities recorded for this asset yet.</p>
+  {% endif %}
+</section>
+
+<form method="post" action="{{ url_for('assets.delete', asset_id=asset.id) }}"
+      class="danger-zone"
+      onsubmit="return confirm('Delete this asset and all its activities?');">
+  <button type="submit" class="btn btn--danger btn--block">Delete asset</button>
+</form>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit asset' if asset else 'New asset' }} · Nemory{% endblock %}
+
+{% block content %}
+<h1 class="page-title">{{ 'Edit asset' if asset else 'New asset' }}</h1>
+
+<form method="post" class="form"
+      action="{{ url_for('assets.edit', asset_id=asset.id) if asset else url_for('assets.create') }}">
+  <label class="field">
+    <span class="field__label">Name</span>
+    <input type="text" name="name" value="{{ asset.name if asset else '' }}"
+           placeholder="House, Generator, Roof…" autofocus required>
+  </label>
+  <button type="submit" class="btn btn--primary btn--block">Save</button>
+</form>
+{% endblock %}

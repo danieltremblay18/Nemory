@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit activity' if activity.id else 'New activity' }} · Nemory{% endblock %}
+
+{% block content %}
+<h1 class="page-title">{{ 'Edit activity' if activity.id else 'New activity' }}</h1>
+
+<form method="post" class="form"
+      action="{{ url_for('activities.edit', activity_id=activity.id) if activity.id else url_for('activities.create') }}">
+
+  <label class="field">
+    <span class="field__label">Asset</span>
+    <select name="asset_id" required>
+      <option value="" disabled {{ 'selected' if not activity.asset_id }}>Choose an asset…</option>
+      {% for asset in assets %}
+        <option value="{{ asset.id }}"
+          {{ 'selected' if asset.id|string == activity.asset_id|string }}>{{ asset.name }}</option>
+      {% endfor %}
+    </select>
+  </label>
+
+  <label class="field">
+    <span class="field__label">Title</span>
+    <input type="text" name="title" value="{{ activity.title or '' }}"
+           placeholder="Oil change, Inspection…" required>
+  </label>
+
+  <label class="field">
+    <span class="field__label">Date</span>
+    <input type="date" name="activity_date" value="{{ activity.activity_date or '' }}" required>
+  </label>
+
+  <label class="field">
+    <span class="field__label">Description <em>(optional)</em></span>
+    <textarea name="description" rows="3" placeholder="Details, parts, notes…">{{ activity.description or '' }}</textarea>
+  </label>
+
+  <fieldset class="field field--reminder">
+    <legend class="field__label">Reminder <em>(optional)</em></legend>
+    <div class="reminder-row">
+      <span class="reminder-row__prefix">Every</span>
+      <input type="number" name="reminder_interval" min="1" inputmode="numeric"
+             value="{{ activity.reminder_interval or '' }}" placeholder="6">
+      <select name="reminder_unit">
+        <option value="" {{ 'selected' if not activity.reminder_unit }}>—</option>
+        {% for unit in units %}
+          <option value="{{ unit }}"
+            {{ 'selected' if unit == activity.reminder_unit }}>{{ unit }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <p class="field__hint">Leave blank for a one-time activity.</p>
+  </fieldset>
+
+  <button type="submit" class="btn btn--primary btn--block">Save activity</button>
+</form>
+{% endblock %}

@@ -1,0 +1,20 @@
+{# Renders one activity row. Expects: activity (with asset_name). #}
+{% set days = activity.next_reminder_date | days_until %}
+<a class="card activity" href="{{ url_for('activities.detail', activity_id=activity.id) }}">
+  <div class="activity__main">
+    <span class="activity__title">{{ activity.title }}</span>
+    <span class="activity__asset">{{ activity.asset_name }}</span>
+  </div>
+  <div class="activity__meta">
+    <span class="activity__date">{{ activity.activity_date | pretty_date }}</span>
+    {% if activity.next_reminder_date %}
+      {% if days < 0 %}
+        <span class="chip chip--overdue">Overdue {{ -days }}d</span>
+      {% elif days == 0 %}
+        <span class="chip chip--due">Due today</span>
+      {% else %}
+        <span class="chip chip--upcoming">In {{ days }}d</span>
+      {% endif %}
+    {% endif %}
+  </div>
+</a>
