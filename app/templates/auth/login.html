@@ -3,7 +3,8 @@
 
 {% block content %}
 <div class="login">
-  <h1 class="login__brand">Nemory</h1>
+  <img class="login__logo" src="{{ url_for('static', filename='icons/logo-master-transparent.png') }}"
+       alt="Nemory" width="200" height="200">
   <p class="login__tagline">Your personal maintenance journal.</p>
 
   <form method="post" class="form">

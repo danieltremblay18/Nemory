@@ -2,8 +2,13 @@
 // cache-first, and fall back to the network for everything else (dynamic pages
 // that require authentication should always hit the server).
 
-const CACHE = "nemory-v1";
-const SHELL = ["/static/css/style.css", "/static/js/app.js", "/static/icons/icon.svg"];
+const CACHE = "nemory-v2";
+const SHELL = [
+  "/static/css/style.css",
+  "/static/js/app.js",
+  "/static/icons/favicon-48.png",
+  "/static/icons/logo-mark-64.png",
+];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(SHELL)));
