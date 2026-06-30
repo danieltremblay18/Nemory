@@ -85,8 +85,16 @@ pip install -r requirements.txt
 flask --app wsgi init-db
 ```
 
-**5. Create the web app** — go to the **Web** tab → *Add a new web app* →
-*Manual configuration* (not the "Flask" preset) → pick **Python 3.11** (match step 3).
+**5. Create the web app** — go to the **Web** tab → *Add a new web app* → confirm the
+domain → on the *Select a Python Web framework* screen choose **Manual configuration**
+(at the bottom) → pick **Python 3.11** (must match step 3).
+
+> ⚠️ **Do NOT pick the "Flask" framework option.** It runs a "Quickstart new Flask
+> project" wizard that creates — and overwrites — a single-file sample app
+> (`flask_app.py`), which does not fit Nemory's package layout. If you land on a
+> *"Quickstart new Flask project / Enter a path for a Python file"* screen, click
+> **Back** and choose **Manual configuration** instead. With manual configuration the
+> app is created empty and you point it at the real `wsgi.py` in step 7.
 
 **6. Point the web app at the project** — in the Web tab's *Code* section set:
 
