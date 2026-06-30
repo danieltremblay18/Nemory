@@ -116,6 +116,7 @@ if project not in sys.path:
     sys.path.insert(0, project)
 
 import os
+os.environ["NEMORY_ENV"] = "production"                   # enables the secret-safety guard
 os.environ["SECRET_KEY"] = "paste-a-generated-key-here"   # python -c "import secrets; print(secrets.token_hex(32))"
 os.environ["NEMORY_PASSWORD"] = "your-login-password"
 
@@ -123,7 +124,9 @@ from wsgi import app as application
 ```
 
 > Only `SECRET_KEY` and `NEMORY_PASSWORD` are placeholders — fill them in. The paths
-> are already correct for the `danieltremblay18` account.
+> are already correct for the `danieltremblay18` account. `NEMORY_ENV=production`
+> makes the app **refuse to start** if you leave the default secrets in place, so a
+> startup error here means you still need to set a real key/password.
 
 **8. (Optional) Serve static files faster** — in the Web tab's *Static files* section
 add a mapping: URL `/static/` → Directory `/home/danieltremblay18/Nemory/app/static`.

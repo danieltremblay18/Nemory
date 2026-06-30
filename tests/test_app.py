@@ -1,5 +1,43 @@
 """End-to-end checks over the main user flows via the Flask test client."""
 
+import pytest
+
+from app import create_app
+from config import Config, DEV_PASSWORD, DEV_SECRET_KEY
+
+
+def test_production_rejects_default_secret(tmp_path):
+    class ProdConfig(Config):
+        IS_PRODUCTION = True
+        SECRET_KEY = DEV_SECRET_KEY  # still the dummy default
+        NEMORY_PASSWORD = "a-real-password"
+        DATABASE = str(tmp_path / "p.sqlite")
+
+    with pytest.raises(RuntimeError):
+        create_app(ProdConfig)
+
+
+def test_production_rejects_default_password(tmp_path):
+    class ProdConfig(Config):
+        IS_PRODUCTION = True
+        SECRET_KEY = "a-strong-random-key"
+        NEMORY_PASSWORD = DEV_PASSWORD  # still the dummy default
+        DATABASE = str(tmp_path / "p.sqlite")
+
+    with pytest.raises(RuntimeError):
+        create_app(ProdConfig)
+
+
+def test_production_allows_real_secrets(tmp_path):
+    class ProdConfig(Config):
+        IS_PRODUCTION = True
+        SECRET_KEY = "a-strong-random-key"
+        NEMORY_PASSWORD = "a-real-password"
+        DATABASE = str(tmp_path / "p.sqlite")
+
+    app = create_app(ProdConfig)
+    assert app.config["SECRET_KEY"] == "a-strong-random-key"
+
 
 def test_login_required_redirects(client):
     resp = client.get("/", follow_redirects=False)

@@ -21,6 +21,7 @@ if PROJECT_DIR not in sys.path:
 # 2. Secrets / config. Must be set BEFORE the import below: config.py reads these
 #    from os.environ at import time.
 #    Generate a key with: python -c "import secrets; print(secrets.token_hex(32))"
+os.environ["NEMORY_ENV"] = "production"  # enables the secret-safety guard
 os.environ["SECRET_KEY"] = "PASTE_A_GENERATED_KEY_HERE"
 os.environ["NEMORY_PASSWORD"] = "CHANGE_ME"  # the password you log in with
 

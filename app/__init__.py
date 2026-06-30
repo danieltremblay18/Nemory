@@ -15,6 +15,8 @@ def create_app(config_object: type = Config) -> Flask:
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_object(config_object)
 
+    _check_production_secrets(app)
+
     # Default the database into the instance folder unless overridden.
     import os
 
@@ -38,6 +40,33 @@ def create_app(config_object: type = Config) -> Flask:
     _register_error_handlers(app)
 
     return app
+
+
+def _check_production_secrets(app: Flask) -> None:
+    """Refuse to start in production while still using the dummy dev secrets.
+
+    Enabled by NEMORY_ENV=production (see config.py). This turns a silent
+    security hole — running a public server with the committed default key or
+    password — into a loud startup failure.
+    """
+    if not app.config.get("IS_PRODUCTION"):
+        return
+
+    from config import DEV_PASSWORD, DEV_SECRET_KEY
+
+    insecure = []
+    if app.config["SECRET_KEY"] == DEV_SECRET_KEY:
+        insecure.append("SECRET_KEY")
+    if app.config["NEMORY_PASSWORD"] == DEV_PASSWORD:
+        insecure.append("NEMORY_PASSWORD")
+
+    if insecure:
+        raise RuntimeError(
+            "Refusing to start in production with default "
+            f"{' and '.join(insecure)}. Set "
+            f"{' and '.join(insecure)} to real secret value(s) via environment "
+            "variables (see deploy/pythonanywhere_wsgi.py)."
+        )
 
 
 def _register_template_helpers(app: Flask) -> None:
