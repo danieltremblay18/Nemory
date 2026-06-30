@@ -134,7 +134,24 @@ add a mapping: URL `/static/` → Directory `/home/danieltremblay18/Nemory/app/s
 **9. Reload** the web app (green button), then open
 `https://danieltremblay18.pythonanywhere.com` and log in with `NEMORY_PASSWORD`.
 
-### Updating later
+### Updating later (deploy a new commit)
+
+PythonAnywhere does **not** auto-deploy from GitHub — you pull the latest commit and
+reload the app yourself. The repo ships a [`deploy.sh`](deploy.sh) helper that does
+both in one command. In a **Bash console**:
+
+```bash
+bash ~/Nemory/deploy.sh
+```
+
+It runs `git pull` and reloads the app by touching the WSGI file
+(`/var/www/danieltremblay18_pythonanywhere_com_wsgi.py`). If `requirements.txt`
+changed, uncomment the two `pip install` lines in `deploy.sh` first.
+
+> If Bash complains about `\r` (the script was edited on Windows), strip the carriage
+> returns once: `sed -i 's/\r$//' ~/Nemory/deploy.sh`.
+
+Doing it manually instead:
 
 ```bash
 cd ~/Nemory && git pull
