@@ -60,7 +60,8 @@ waitress-serve --port=8000 wsgi:app
 
 The free **Beginner** plan runs Flask + SQLite as-is: the database is just a file in
 your persistent home directory (512 MB), so data survives restarts. No code changes
-needed. Replace `USER` with your PythonAnywhere username throughout.
+needed. Paths below use the account username `danieltremblay18` — if you deploy under
+a different account, swap that for your own username.
 
 **1. Create the account** at <https://www.pythonanywhere.com> (Beginner / $0).
 
@@ -98,9 +99,9 @@ domain → on the *Select a Python Web framework* screen choose **Manual configu
 
 **6. Point the web app at the project** — in the Web tab's *Code* section set:
 
-- **Source code**: `/home/USER/Nemory`
-- **Working directory**: `/home/USER/Nemory`
-- **Virtualenv**: `/home/USER/.venvs/nemory`
+- **Source code**: `/home/danieltremblay18/Nemory`
+- **Working directory**: `/home/danieltremblay18/Nemory`
+- **Virtualenv**: `/home/danieltremblay18/.venvs/nemory`
 
 **7. Edit the WSGI file** — click the *WSGI configuration file* link in the Web tab,
 delete its contents, and replace with the following (also available ready-to-paste in
@@ -110,7 +111,7 @@ secrets live, kept out of git:
 ```python
 import sys
 
-project = "/home/USER/Nemory"
+project = "/home/danieltremblay18/Nemory"
 if project not in sys.path:
     sys.path.insert(0, project)
 
@@ -121,11 +122,14 @@ os.environ["NEMORY_PASSWORD"] = "your-login-password"
 from wsgi import app as application
 ```
 
+> Only `SECRET_KEY` and `NEMORY_PASSWORD` are placeholders — fill them in. The paths
+> are already correct for the `danieltremblay18` account.
+
 **8. (Optional) Serve static files faster** — in the Web tab's *Static files* section
-add a mapping: URL `/static/` → Directory `/home/USER/Nemory/app/static`.
+add a mapping: URL `/static/` → Directory `/home/danieltremblay18/Nemory/app/static`.
 
 **9. Reload** the web app (green button), then open
-`https://USER.pythonanywhere.com` and log in with `NEMORY_PASSWORD`.
+`https://danieltremblay18.pythonanywhere.com` and log in with `NEMORY_PASSWORD`.
 
 ### Updating later
 
