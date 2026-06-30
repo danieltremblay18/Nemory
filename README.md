@@ -95,8 +95,9 @@ flask --app wsgi init-db
 - **Virtualenv**: `/home/USER/.venvs/nemory`
 
 **7. Edit the WSGI file** — click the *WSGI configuration file* link in the Web tab,
-delete its contents, and replace with (this is also where the secrets live, kept out
-of git):
+delete its contents, and replace with the following (also available ready-to-paste in
+[`deploy/pythonanywhere_wsgi.py`](deploy/pythonanywhere_wsgi.py)). This is where the
+secrets live, kept out of git:
 
 ```python
 import sys
