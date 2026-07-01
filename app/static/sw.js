@@ -2,7 +2,7 @@
 // cache-first, and fall back to the network for everything else (dynamic pages
 // that require authentication should always hit the server).
 
-const CACHE = "nemory-v2";
+const CACHE = "nemory-v3";
 const SHELL = [
   "/static/css/style.css",
   "/static/js/app.js",

@@ -4,24 +4,24 @@
 {% block content %}
 <div class="page-head">
   <h1 class="page-title">{{ asset.name }}</h1>
-  <a class="btn btn--small btn--ghost" href="{{ url_for('assets.edit', asset_id=asset.id) }}">Edit</a>
+  <a class="btn btn--small btn--ghost" href="{{ url_for('assets.edit', asset_id=asset.id) }}">Modifier</a>
 </div>
 
 <a class="btn btn--primary btn--block"
-   href="{{ url_for('activities.create', asset_id=asset.id) }}">Add activity</a>
+   href="{{ url_for('activities.create', asset_id=asset.id) }}">Ajouter une activité</a>
 
 <section class="section">
-  <h2 class="section__title">Activities</h2>
+  <h2 class="section__title">Activités</h2>
   {% if activities %}
     {% for activity in activities %}{% include "_activity_card.html" %}{% endfor %}
   {% else %}
-    <p class="empty">No activities recorded for this asset yet.</p>
+    <p class="empty">Aucune activité enregistrée pour ce bien pour l'instant.</p>
   {% endif %}
 </section>
 
 <form method="post" action="{{ url_for('assets.delete', asset_id=asset.id) }}"
       class="danger-zone"
-      onsubmit="return confirm('Delete this asset and all its activities?');">
-  <button type="submit" class="btn btn--danger btn--block">Delete asset</button>
+      onsubmit="return confirm('Supprimer ce bien et toutes ses activités ?');">
+  <button type="submit" class="btn btn--danger btn--block">Supprimer le bien</button>
 </form>
 {% endblock %}

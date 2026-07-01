@@ -47,13 +47,13 @@ def test_login_required_redirects(client):
 
 def test_wrong_password_rejected(client):
     resp = client.post("/login", data={"password": "nope"}, follow_redirects=True)
-    assert b"Incorrect password" in resp.data
+    assert b"Mot de passe incorrect" in resp.data
 
 
 def test_home_loads_when_authenticated(auth_client):
     resp = auth_client.get("/")
     assert resp.status_code == 200
-    assert b"Today" in resp.data
+    assert b"Aujourd" in resp.data
 
 
 def test_full_activity_flow(auth_client):
@@ -83,7 +83,7 @@ def test_full_activity_flow(auth_client):
     # It should surface on the home page as overdue.
     home = auth_client.get("/")
     assert b"Oil change" in home.data
-    assert b"Overdue" in home.data
+    assert b"En retard" in home.data
 
     # Search finds it by description.
     found = auth_client.get("/search?q=filter")
@@ -97,4 +97,4 @@ def test_activity_requires_valid_date(auth_client):
         data={"asset_id": "1", "title": "Roof", "activity_date": "not-a-date"},
         follow_redirects=True,
     )
-    assert b"valid activity date" in resp.data
+    assert b"valide est requise" in resp.data

@@ -79,7 +79,7 @@ def create():
     if request.method == "POST":
         name = request.form.get("name", "").strip()
         if not name:
-            flash("Name is required.")
+            flash("Le nom est obligatoire.")
             return render_template("assets/form.html", asset=None)
         db = get_db()
         cur = db.execute("INSERT INTO assets (name) VALUES (?)", (name,))
@@ -95,7 +95,7 @@ def edit(asset_id: int):
     if request.method == "POST":
         name = request.form.get("name", "").strip()
         if not name:
-            flash("Name is required.")
+            flash("Le nom est obligatoire.")
             return render_template("assets/form.html", asset=asset)
         db = get_db()
         db.execute(
@@ -114,5 +114,5 @@ def delete(asset_id: int):
     db = get_db()
     db.execute("DELETE FROM assets WHERE id = ?", (asset_id,))
     db.commit()
-    flash("Asset deleted.")
+    flash("Bien supprimé.")
     return redirect(url_for("assets.index"))

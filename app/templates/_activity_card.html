@@ -9,11 +9,11 @@
     <span class="activity__date">{{ activity.activity_date | pretty_date }}</span>
     {% if activity.next_reminder_date %}
       {% if days < 0 %}
-        <span class="chip chip--overdue">Overdue {{ -days }}d</span>
+        <span class="chip chip--overdue">En retard {{ -days }}j</span>
       {% elif days == 0 %}
-        <span class="chip chip--due">Due today</span>
+        <span class="chip chip--due">Aujourd'hui</span>
       {% else %}
-        <span class="chip chip--upcoming">In {{ days }}d</span>
+        <span class="chip chip--upcoming">Dans {{ days }}j</span>
       {% endif %}
     {% endif %}
   </div>

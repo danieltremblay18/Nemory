@@ -1,7 +1,8 @@
 {
   "name": "Nemory",
   "short_name": "Nemory",
-  "description": "A personal maintenance journal.",
+  "description": "Votre journal d'entretien personnel.",
+  "lang": "fr",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

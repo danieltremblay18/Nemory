@@ -23,6 +23,18 @@ from app.services.reminders import VALID_UNITS, compute_next_reminder_date
 
 bp = Blueprint("activities", __name__, url_prefix="/activities")
 
+# Seed suggestions shown before the journal has built up its own history. Once an
+# activity is saved, its title joins the list automatically (see _title_suggestions).
+PREDEFINED_TITLES = (
+    "Changement d'huile",
+    "Inspection",
+    "Remplacement de filtre",
+    "Nettoyage",
+    "Vérification de la batterie",
+    "Hivernage",
+    "Entretien",
+)
+
 
 def get_activity_or_404(activity_id: int):
     activity = (
@@ -51,6 +63,23 @@ def _all_assets():
     )
 
 
+def _title_suggestions():
+    """Distinct titles already used, merged with the predefined seeds.
+
+    This is what makes a new title 'stick': once saved, it shows up here for
+    every future activity. Returns a case-insensitively sorted list of strings.
+    """
+    used = [
+        row["title"]
+        for row in get_db()
+        .execute("SELECT DISTINCT title FROM activities")
+        .fetchall()
+    ]
+    seen = {title.casefold() for title in used}
+    extras = [t for t in PREDEFINED_TITLES if t.casefold() not in seen]
+    return sorted(used + extras, key=str.casefold)
+
+
 def _parse_form(form):
     """Validate and normalize the activity form.
 
@@ -65,24 +94,24 @@ def _parse_form(form):
     unit = form.get("reminder_unit", "").strip() or None
 
     if not asset_id:
-        return None, "Please choose an asset."
+        return None, "Veuillez choisir un bien."
     if not title:
-        return None, "Title is required."
+        return None, "Le titre est obligatoire."
     try:
         activity_date = date.fromisoformat(activity_date_raw)
     except ValueError:
-        return None, "A valid activity date is required."
+        return None, "Une date d'activité valide est requise."
 
     interval = None
     if interval_raw:
         try:
             interval = int(interval_raw)
         except ValueError:
-            return None, "Reminder interval must be a whole number."
+            return None, "L'intervalle de rappel doit être un nombre entier."
         if interval <= 0:
-            return None, "Reminder interval must be greater than zero."
+            return None, "L'intervalle de rappel doit être supérieur à zéro."
         if unit not in VALID_UNITS:
-            return None, "Please choose a reminder unit."
+            return None, "Veuillez choisir une unité de rappel."
     else:
         unit = None  # no interval -> no reminder
 
@@ -109,7 +138,7 @@ def _parse_form(form):
 def create():
     assets = _all_assets()
     if not assets:
-        flash("Create an asset first.")
+        flash("Créez d'abord un bien.")
         return redirect(url_for("assets.create"))
 
     if request.method == "POST":
@@ -121,6 +150,7 @@ def create():
                 activity=request.form,
                 assets=assets,
                 units=VALID_UNITS,
+                title_suggestions=_title_suggestions(),
             )
         db = get_db()
         cur = db.execute(
@@ -134,7 +164,7 @@ def create():
             values,
         )
         db.commit()
-        flash("Activity saved.")
+        flash("Activité enregistrée.")
         return redirect(url_for("activities.detail", activity_id=cur.lastrowid))
 
     # Pre-select an asset and default the date to today for a fast (<30s) entry.
@@ -143,7 +173,11 @@ def create():
         "activity_date": date.today().isoformat(),
     }
     return render_template(
-        "activities/form.html", activity=prefill, assets=assets, units=VALID_UNITS
+        "activities/form.html",
+        activity=prefill,
+        assets=assets,
+        units=VALID_UNITS,
+        title_suggestions=_title_suggestions(),
     )
 
 
@@ -169,6 +203,7 @@ def edit(activity_id: int):
                 activity=request.form,
                 assets=assets,
                 units=VALID_UNITS,
+                title_suggestions=_title_suggestions(),
             )
         db = get_db()
         db.execute(
@@ -187,11 +222,15 @@ def edit(activity_id: int):
             {**values, "id": activity_id},
         )
         db.commit()
-        flash("Activity updated.")
+        flash("Activité mise à jour.")
         return redirect(url_for("activities.detail", activity_id=activity_id))
 
     return render_template(
-        "activities/form.html", activity=activity, assets=assets, units=VALID_UNITS
+        "activities/form.html",
+        activity=activity,
+        assets=assets,
+        units=VALID_UNITS,
+        title_suggestions=_title_suggestions(),
     )
 
 
@@ -202,5 +241,5 @@ def delete(activity_id: int):
     db = get_db()
     db.execute("DELETE FROM activities WHERE id = ?", (activity_id,))
     db.commit()
-    flash("Activity deleted.")
+    flash("Activité supprimée.")
     return redirect(url_for("assets.detail", asset_id=activity["asset_id"]))

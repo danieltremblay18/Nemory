@@ -4,7 +4,7 @@
 {% block content %}
 <div class="page-head">
   <h1 class="page-title">{{ activity.title }}</h1>
-  <a class="btn btn--small btn--ghost" href="{{ url_for('activities.edit', activity_id=activity.id) }}">Edit</a>
+  <a class="btn btn--small btn--ghost" href="{{ url_for('activities.edit', activity_id=activity.id) }}">Modifier</a>
 </div>
 
 <a class="muted-link" href="{{ url_for('assets.detail', asset_id=activity.asset_id) }}">
@@ -14,18 +14,18 @@
 <dl class="detail">
   <div><dt>Date</dt><dd>{{ activity.activity_date | pretty_date }}</dd></div>
   {% if activity.description %}
-    <div><dt>Details</dt><dd class="detail__text">{{ activity.description }}</dd></div>
+    <div><dt>Détails</dt><dd class="detail__text">{{ activity.description }}</dd></div>
   {% endif %}
   {% if activity.next_reminder_date %}
     {% set days = activity.next_reminder_date | days_until %}
     <div>
-      <dt>Next reminder</dt>
+      <dt>Prochain rappel</dt>
       <dd>
         {{ activity.next_reminder_date | pretty_date }}
         <span class="chip {{ 'chip--overdue' if days < 0 else 'chip--upcoming' }}">
-          {% if days < 0 %}overdue {{ -days }}d{% elif days == 0 %}due today{% else %}in {{ days }}d{% endif %}
+          {% if days < 0 %}en retard {{ -days }}j{% elif days == 0 %}aujourd'hui{% else %}dans {{ days }}j{% endif %}
         </span>
-        <br><small class="muted">every {{ activity.reminder_interval }} {{ activity.reminder_unit }}</small>
+        <br><small class="muted">tous les {{ activity.reminder_interval }} {{ activity.reminder_unit | unit_label }}</small>
       </dd>
     </div>
   {% endif %}
@@ -33,7 +33,7 @@
 
 <form method="post" action="{{ url_for('activities.delete', activity_id=activity.id) }}"
       class="danger-zone"
-      onsubmit="return confirm('Delete this activity?');">
-  <button type="submit" class="btn btn--danger btn--block">Delete activity</button>
+      onsubmit="return confirm('Supprimer cette activité ?');">
+  <button type="submit" class="btn btn--danger btn--block">Supprimer l'activité</button>
 </form>
 {% endblock %}

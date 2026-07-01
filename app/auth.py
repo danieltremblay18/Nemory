@@ -60,7 +60,7 @@ def login():
             session["authenticated"] = True
             session.permanent = True
             return redirect(request.args.get("next") or url_for("main.home"))
-        flash("Incorrect password.")
+        flash("Mot de passe incorrect.")
 
     return render_template("auth/login.html")
 

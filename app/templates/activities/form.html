@@ -1,16 +1,16 @@
 {% extends "base.html" %}
-{% block title %}{{ 'Edit activity' if activity.id else 'New activity' }} · Nemory{% endblock %}
+{% block title %}{{ 'Modifier l'activité' if activity.id else 'Nouvelle activité' }} · Nemory{% endblock %}
 
 {% block content %}
-<h1 class="page-title">{{ 'Edit activity' if activity.id else 'New activity' }}</h1>
+<h1 class="page-title">{{ 'Modifier l'activité' if activity.id else 'Nouvelle activité' }}</h1>
 
 <form method="post" class="form"
       action="{{ url_for('activities.edit', activity_id=activity.id) if activity.id else url_for('activities.create') }}">
 
   <label class="field">
-    <span class="field__label">Asset</span>
+    <span class="field__label">Bien</span>
     <select name="asset_id" required>
-      <option value="" disabled {{ 'selected' if not activity.asset_id }}>Choose an asset…</option>
+      <option value="" disabled {{ 'selected' if not activity.asset_id }}>Choisir un bien…</option>
       {% for asset in assets %}
         <option value="{{ asset.id }}"
           {{ 'selected' if asset.id|string == activity.asset_id|string }}>{{ asset.name }}</option>
@@ -19,9 +19,15 @@
   </label>
 
   <label class="field">
-    <span class="field__label">Title</span>
+    <span class="field__label">Titre</span>
     <input type="text" name="title" value="{{ activity.title or '' }}"
-           placeholder="Oil change, Inspection…" required>
+           list="title-suggestions" autocomplete="off"
+           placeholder="Changement d'huile, Inspection…" required>
+    <datalist id="title-suggestions">
+      {% for title in title_suggestions %}
+        <option value="{{ title }}"></option>
+      {% endfor %}
+    </datalist>
   </label>
 
   <label class="field">
@@ -30,27 +36,27 @@
   </label>
 
   <label class="field">
-    <span class="field__label">Description <em>(optional)</em></span>
-    <textarea name="description" rows="3" placeholder="Details, parts, notes…">{{ activity.description or '' }}</textarea>
+    <span class="field__label">Description <em>(facultatif)</em></span>
+    <textarea name="description" rows="3" placeholder="Détails, pièces, notes…">{{ activity.description or '' }}</textarea>
   </label>
 
   <fieldset class="field field--reminder">
-    <legend class="field__label">Reminder <em>(optional)</em></legend>
+    <legend class="field__label">Rappel <em>(facultatif)</em></legend>
     <div class="reminder-row">
-      <span class="reminder-row__prefix">Every</span>
+      <span class="reminder-row__prefix">Tous les</span>
       <input type="number" name="reminder_interval" min="1" inputmode="numeric"
              value="{{ activity.reminder_interval or '' }}" placeholder="6">
       <select name="reminder_unit">
         <option value="" {{ 'selected' if not activity.reminder_unit }}>—</option>
         {% for unit in units %}
           <option value="{{ unit }}"
-            {{ 'selected' if unit == activity.reminder_unit }}>{{ unit }}</option>
+            {{ 'selected' if unit == activity.reminder_unit }}>{{ unit | unit_label }}</option>
         {% endfor %}
       </select>
     </div>
-    <p class="field__hint">Leave blank for a one-time activity.</p>
+    <p class="field__hint">Laissez vide pour une activité ponctuelle.</p>
   </fieldset>
 
-  <button type="submit" class="btn btn--primary btn--block">Save activity</button>
+  <button type="submit" class="btn btn--primary btn--block">Enregistrer l'activité</button>
 </form>
 {% endblock %}

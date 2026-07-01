@@ -69,14 +69,26 @@ def _check_production_secrets(app: Flask) -> None:
         )
 
 
+# French month names, used by the pretty_date filter. Kept here (rather than
+# relying on locale/strftime) so date rendering is identical on every platform.
+_MONTHS_FR = (
+    "janvier", "février", "mars", "avril", "mai", "juin",
+    "juillet", "août", "septembre", "octobre", "novembre", "décembre",
+)
+
+# Display labels for the stored (English) reminder units. The stored values stay
+# 'days'/'months'/'years' so a future i18n layer can swap labels without a migration.
+_UNIT_LABELS_FR = {"days": "jours", "months": "mois", "years": "ans"}
+
+
 def _register_template_helpers(app: Flask) -> None:
     @app.template_filter("pretty_date")
     def pretty_date(value) -> str:
-        """Render an ISO date string (or date) as e.g. 'Jun 29, 2026'."""
+        """Render an ISO date string (or date) as e.g. '29 juin 2026'."""
         if not value:
             return ""
         d = value if isinstance(value, date) else date.fromisoformat(str(value))
-        return d.strftime("%b %d, %Y")
+        return f"{d.day} {_MONTHS_FR[d.month - 1]} {d.year}"
 
     @app.template_filter("days_until")
     def days_until(value) -> int | None:
@@ -85,6 +97,11 @@ def _register_template_helpers(app: Flask) -> None:
             return None
         d = value if isinstance(value, date) else date.fromisoformat(str(value))
         return (d - date.today()).days
+
+    @app.template_filter("unit_label")
+    def unit_label(value) -> str:
+        """Map a stored reminder unit ('days'/'months'/'years') to its French label."""
+        return _UNIT_LABELS_FR.get(value, value or "")
 
 
 def _register_error_handlers(app: Flask) -> None:
