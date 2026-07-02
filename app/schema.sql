@@ -6,6 +6,7 @@ PRAGMA foreign_keys = ON;
 CREATE TABLE IF NOT EXISTS assets (
     id         INTEGER PRIMARY KEY AUTOINCREMENT,
     name       TEXT    NOT NULL,
+    owner      TEXT    NOT NULL DEFAULT '',
     notes      TEXT    NOT NULL DEFAULT '',
     supplier   TEXT    NOT NULL DEFAULT '',
     contact    TEXT    NOT NULL DEFAULT '',

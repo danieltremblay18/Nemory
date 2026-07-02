@@ -26,6 +26,7 @@ def _parse_asset_form(form):
     if not name:
         return None, "Le nom est obligatoire."
 
+    owner = form.get("owner", "").strip()
     notes = form.get("notes", "").strip()
     supplier = form.get("supplier", "").strip()
     contact = form.get("contact", "").strip()
@@ -40,7 +41,7 @@ def _parse_asset_form(form):
         if not (1900 <= year <= 2100):
             return None, "L'année doit être comprise entre 1900 et 2100."
 
-    return {"name": name, "notes": notes, "supplier": supplier, "contact": contact, "year": year}, None
+    return {"name": name, "owner": owner, "notes": notes, "supplier": supplier, "contact": contact, "year": year}, None
 
 
 def get_asset_or_404(asset_id: int):
@@ -107,8 +108,8 @@ def create():
         db = get_db()
         cur = db.execute(
             """
-            INSERT INTO assets (name, notes, supplier, contact, year)
-            VALUES (:name, :notes, :supplier, :contact, :year)
+            INSERT INTO assets (name, owner, notes, supplier, contact, year)
+            VALUES (:name, :owner, :notes, :supplier, :contact, :year)
             """,
             values,
         )
@@ -131,6 +132,7 @@ def edit(asset_id: int):
             """
             UPDATE assets SET
                 name = :name,
+                owner = :owner,
                 notes = :notes,
                 supplier = :supplier,
                 contact = :contact,

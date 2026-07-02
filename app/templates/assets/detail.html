@@ -10,10 +10,11 @@
 <a class="btn btn--primary btn--block"
    href="{{ url_for('activities.create', asset_id=asset.id) }}">Ajouter une activité</a>
 
-{% if asset.year or asset.supplier or asset.contact or asset.notes %}
+{% if asset.owner or asset.year or asset.supplier or asset.contact or asset.notes %}
 <section class="section">
   <h2 class="section__title">Informations</h2>
   <dl class="detail">
+    {% if asset.owner %}<div><dt>Propriétaire</dt><dd>{{ asset.owner }}</dd></div>{% endif %}
     {% if asset.year %}<div><dt>Année d'acquisition/installation</dt><dd>{{ asset.year }}</dd></div>{% endif %}
     {% if asset.supplier %}<div><dt>Fournisseur</dt><dd>{{ asset.supplier }}</dd></div>{% endif %}
     {% if asset.contact %}<div><dt>Contact</dt><dd>{{ asset.contact }}</dd></div>{% endif %}
