@@ -8,6 +8,14 @@ cached on Flask's ``g``.
 import sqlite3
 from pathlib import Path
 
+_MIGRATIONS = [
+    "ALTER TABLE assets ADD COLUMN notes TEXT NOT NULL DEFAULT ''",
+    "ALTER TABLE assets ADD COLUMN supplier TEXT NOT NULL DEFAULT ''",
+    "ALTER TABLE assets ADD COLUMN contact TEXT NOT NULL DEFAULT ''",
+    "ALTER TABLE assets ADD COLUMN year INTEGER",
+    "ALTER TABLE activities ADD COLUMN cost REAL",
+]
+
 import click
 from flask import current_app, g
 
@@ -31,12 +39,22 @@ def close_db(exception=None) -> None:
         db.close()
 
 
+def _migrate_db(db: sqlite3.Connection) -> None:
+    """Add columns introduced after the initial schema (idempotent)."""
+    for sql in _MIGRATIONS:
+        try:
+            db.execute(sql)
+        except sqlite3.OperationalError:
+            pass  # column already exists
+    db.commit()
+
+
 def init_db() -> None:
-    """Create tables from schema.sql (idempotent)."""
+    """Create tables from schema.sql then apply incremental migrations."""
     db = get_db()
     schema = Path(current_app.root_path, "schema.sql").read_text(encoding="utf-8")
     db.executescript(schema)
-    db.commit()
+    _migrate_db(db)
 
 
 @click.command("init-db")

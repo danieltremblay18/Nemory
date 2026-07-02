@@ -13,6 +13,9 @@
 
 <dl class="detail">
   <div><dt>Date</dt><dd>{{ activity.activity_date | pretty_date }}</dd></div>
+  {% if activity.cost is not none %}
+    <div><dt>Coût</dt><dd>{{ activity.cost | format_cost }}</dd></div>
+  {% endif %}
   {% if activity.description %}
     <div><dt>Détails</dt><dd class="detail__text">{{ activity.description }}</dd></div>
   {% endif %}

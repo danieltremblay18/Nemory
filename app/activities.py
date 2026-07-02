@@ -117,6 +117,16 @@ def _parse_form(form):
 
     next_reminder = compute_next_reminder_date(activity_date, interval, unit)
 
+    cost = None
+    cost_raw = form.get("cost", "").strip()
+    if cost_raw:
+        try:
+            cost = float(cost_raw)
+        except ValueError:
+            return None, "Le coût doit être un nombre."
+        if cost < 0:
+            return None, "Le coût ne peut pas être négatif."
+
     return (
         {
             "asset_id": asset_id,
@@ -128,6 +138,7 @@ def _parse_form(form):
             "next_reminder_date": next_reminder.isoformat()
             if next_reminder
             else None,
+            "cost": cost,
         },
         None,
     )
@@ -157,9 +168,9 @@ def create():
             """
             INSERT INTO activities
                 (asset_id, title, description, activity_date,
-                 reminder_interval, reminder_unit, next_reminder_date)
+                 reminder_interval, reminder_unit, next_reminder_date, cost)
             VALUES (:asset_id, :title, :description, :activity_date,
-                    :reminder_interval, :reminder_unit, :next_reminder_date)
+                    :reminder_interval, :reminder_unit, :next_reminder_date, :cost)
             """,
             values,
         )
@@ -216,6 +227,7 @@ def edit(activity_id: int):
                 reminder_interval = :reminder_interval,
                 reminder_unit = :reminder_unit,
                 next_reminder_date = :next_reminder_date,
+                cost = :cost,
                 updated_at = datetime('now')
             WHERE id = :id
             """,

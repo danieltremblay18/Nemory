@@ -1,8 +1,4 @@
-"""Asset routes: list, create, view, rename, delete.
-
-An asset is intentionally just a name (see the project philosophy: no serial
-number, purchase date, price, or accounting).
-"""
+"""Asset routes: list, create, view, rename, delete."""
 
 from flask import (
     Blueprint,
@@ -18,6 +14,33 @@ from app.auth import login_required
 from app.db import get_db
 
 bp = Blueprint("assets", __name__, url_prefix="/assets")
+
+
+def _parse_asset_form(form):
+    """Validate and normalize the asset form.
+
+    Returns ``(values, error)`` where ``values`` is a dict ready for SQL and
+    ``error`` is a user-facing message or ``None``.
+    """
+    name = form.get("name", "").strip()
+    if not name:
+        return None, "Le nom est obligatoire."
+
+    notes = form.get("notes", "").strip()
+    supplier = form.get("supplier", "").strip()
+    contact = form.get("contact", "").strip()
+
+    year = None
+    year_raw = form.get("year", "").strip()
+    if year_raw:
+        try:
+            year = int(year_raw)
+        except ValueError:
+            return None, "L'année doit être un nombre entier."
+        if not (1900 <= year <= 2100):
+            return None, "L'année doit être comprise entre 1900 et 2100."
+
+    return {"name": name, "notes": notes, "supplier": supplier, "contact": contact, "year": year}, None
 
 
 def get_asset_or_404(asset_id: int):
@@ -77,12 +100,18 @@ def detail(asset_id: int):
 @login_required
 def create():
     if request.method == "POST":
-        name = request.form.get("name", "").strip()
-        if not name:
-            flash("Le nom est obligatoire.")
-            return render_template("assets/form.html", asset=None)
+        values, error = _parse_asset_form(request.form)
+        if error:
+            flash(error)
+            return render_template("assets/form.html", asset=request.form)
         db = get_db()
-        cur = db.execute("INSERT INTO assets (name) VALUES (?)", (name,))
+        cur = db.execute(
+            """
+            INSERT INTO assets (name, notes, supplier, contact, year)
+            VALUES (:name, :notes, :supplier, :contact, :year)
+            """,
+            values,
+        )
         db.commit()
         return redirect(url_for("assets.detail", asset_id=cur.lastrowid))
     return render_template("assets/form.html", asset=None)
@@ -93,14 +122,23 @@ def create():
 def edit(asset_id: int):
     asset = get_asset_or_404(asset_id)
     if request.method == "POST":
-        name = request.form.get("name", "").strip()
-        if not name:
-            flash("Le nom est obligatoire.")
-            return render_template("assets/form.html", asset=asset)
+        values, error = _parse_asset_form(request.form)
+        if error:
+            flash(error)
+            return render_template("assets/form.html", asset=request.form)
         db = get_db()
         db.execute(
-            "UPDATE assets SET name = ?, updated_at = datetime('now') WHERE id = ?",
-            (name, asset_id),
+            """
+            UPDATE assets SET
+                name = :name,
+                notes = :notes,
+                supplier = :supplier,
+                contact = :contact,
+                year = :year,
+                updated_at = datetime('now')
+            WHERE id = :id
+            """,
+            {**values, "id": asset_id},
         )
         db.commit()
         return redirect(url_for("assets.detail", asset_id=asset_id))

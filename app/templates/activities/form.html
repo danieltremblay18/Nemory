@@ -40,6 +40,13 @@
     <textarea name="description" rows="3" placeholder="Détails, pièces, notes…">{{ activity.description or '' }}</textarea>
   </label>
 
+  <label class="field">
+    <span class="field__label">Coût <em>(facultatif)</em></span>
+    <input type="number" name="cost" min="0" step="0.01" inputmode="decimal"
+           value="{{ activity.cost or '' }}" placeholder="125.00">
+    <p class="field__hint">En dollars (CAD).</p>
+  </label>
+
   <fieldset class="field field--reminder">
     <legend class="field__label">Rappel <em>(facultatif)</em></legend>
     <div class="reminder-row">

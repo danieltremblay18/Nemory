@@ -10,6 +10,18 @@
 <a class="btn btn--primary btn--block"
    href="{{ url_for('activities.create', asset_id=asset.id) }}">Ajouter une activité</a>
 
+{% if asset.year or asset.supplier or asset.contact or asset.notes %}
+<section class="section">
+  <h2 class="section__title">Informations</h2>
+  <dl class="detail">
+    {% if asset.year %}<div><dt>Année estimée</dt><dd>{{ asset.year }}</dd></div>{% endif %}
+    {% if asset.supplier %}<div><dt>Fournisseur</dt><dd>{{ asset.supplier }}</dd></div>{% endif %}
+    {% if asset.contact %}<div><dt>Contact</dt><dd>{{ asset.contact }}</dd></div>{% endif %}
+    {% if asset.notes %}<div><dt>Notes</dt><dd class="detail__text">{{ asset.notes }}</dd></div>{% endif %}
+  </dl>
+</section>
+{% endif %}
+
 <section class="section">
   <h2 class="section__title">Activités</h2>
   {% if activities %}

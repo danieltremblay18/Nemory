@@ -11,6 +11,32 @@
     <input type="text" name="name" value="{{ asset.name if asset else '' }}"
            placeholder="Maison, Génératrice, Toiture…" autofocus required>
   </label>
+
+  <label class="field">
+    <span class="field__label">Année estimée <em>(facultatif)</em></span>
+    <input type="number" name="year" min="1900" max="2100" inputmode="numeric"
+           value="{{ asset.year if asset else '' }}" placeholder="2018">
+    <p class="field__hint">Acquisition, installation ou fabrication — estimation acceptée.</p>
+  </label>
+
+  <label class="field">
+    <span class="field__label">Fournisseur / magasin <em>(facultatif)</em></span>
+    <input type="text" name="supplier" value="{{ asset.supplier if asset else '' }}"
+           placeholder="Canadian Tire, Puribec…">
+  </label>
+
+  <label class="field">
+    <span class="field__label">Contact d'entretien <em>(facultatif)</em></span>
+    <input type="text" name="contact" value="{{ asset.contact if asset else '' }}"
+           placeholder="Nom, téléphone, courriel…">
+  </label>
+
+  <label class="field">
+    <span class="field__label">Informations importantes <em>(facultatif)</em></span>
+    <textarea name="notes" rows="4"
+              placeholder="Modèle, spécifications, numéro de série…">{{ asset.notes if asset else '' }}</textarea>
+  </label>
+
   <button type="submit" class="btn btn--primary btn--block">Enregistrer</button>
 </form>
 {% endblock %}

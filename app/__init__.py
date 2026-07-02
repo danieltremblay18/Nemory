@@ -103,6 +103,13 @@ def _register_template_helpers(app: Flask) -> None:
         """Map a stored reminder unit ('days'/'months'/'years') to its French label."""
         return _UNIT_LABELS_FR.get(value, value or "")
 
+    @app.template_filter("format_cost")
+    def format_cost(value) -> str:
+        """Format a cost as '300 $' (whole) or '57.99 $' (decimals)."""
+        if value is None:
+            return ""
+        return f"{int(value)} $" if value == int(value) else f"{value:.2f} $"
+
 
 def _register_error_handlers(app: Flask) -> None:
     @app.errorhandler(404)

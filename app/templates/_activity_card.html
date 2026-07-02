@@ -7,6 +7,9 @@
   </div>
   <div class="activity__meta">
     <span class="activity__date">{{ activity.activity_date | pretty_date }}</span>
+    {% if activity.cost %}
+      <span class="activity__cost">{{ activity.cost | format_cost }}</span>
+    {% endif %}
     {% if activity.next_reminder_date %}
       {% if days < 0 %}
         <span class="chip chip--overdue">En retard {{ -days }}j</span>

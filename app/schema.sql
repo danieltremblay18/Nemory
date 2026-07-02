@@ -6,6 +6,10 @@ PRAGMA foreign_keys = ON;
 CREATE TABLE IF NOT EXISTS assets (
     id         INTEGER PRIMARY KEY AUTOINCREMENT,
     name       TEXT    NOT NULL,
+    notes      TEXT    NOT NULL DEFAULT '',
+    supplier   TEXT    NOT NULL DEFAULT '',
+    contact    TEXT    NOT NULL DEFAULT '',
+    year       INTEGER,                          -- NULL = non renseigné
     created_at TEXT    NOT NULL DEFAULT (datetime('now')),
     updated_at TEXT    NOT NULL DEFAULT (datetime('now'))
 );
@@ -19,6 +23,7 @@ CREATE TABLE IF NOT EXISTS activities (
     reminder_interval  INTEGER,                          -- NULL = no reminder
     reminder_unit      TEXT,                             -- 'days' | 'months' | 'years'
     next_reminder_date TEXT,                             -- ISO date, computed
+    cost               REAL,                             -- NULL = non renseigné
     created_at         TEXT    NOT NULL DEFAULT (datetime('now')),
     updated_at         TEXT    NOT NULL DEFAULT (datetime('now'))
 );
