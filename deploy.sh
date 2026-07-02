@@ -15,6 +15,9 @@ git pull
 # source ~/.venvs/nemory/bin/activate
 # pip install -r requirements.txt
 
+echo "==> migrations DB"
+~/.venvs/nemory/bin/flask --app wsgi init-db
+
 echo "==> reload de l'app"
 touch "$WSGI"
 
